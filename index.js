@@ -30,7 +30,7 @@ function startProxyServer(port) {
               "\r\n"
           );
           srvSocket.on("error", (e) => {
-            console.error("On Error:", e);
+            console.error("On Socket Error:", e);
             onError(e);
           });
           srvSocket.pipe(socket);
