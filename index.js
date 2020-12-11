@@ -35,7 +35,10 @@ function startProxyServer(port) {
       );
     });
 
-    server.on("error", console.error);
+    server.on("error", (e) => {
+      console.error("On Error:", e);
+      throw "On Error!";
+    });
     server.on("close", () => console.log("Closing server...."));
   } catch (e) {
     console.error("Unhandled Error:", e);
