@@ -1,59 +1,46 @@
-// const http = require("http");
-// const httpProxy = require("http-proxy");
+const http = require("http");
+const net = require("net");
+const httpProxy = require("http-proxy");
+const url = require("url");
+const proxy = httpProxy.createServer();
+const PORT = 3000;
 
-// const proxy = httpProxy.createProxyServer({
-//   secure: false,
-//   changeOrigin: true,
-// });
-// const PORT = 3000;
+function startProxyServer(port) {
+  try {
+    const server = http
+      .createServer(function (req, res) {
+        console.log("Receiving reverse proxy request for:" + req.url);
+        const parsedUrl = url.parse(req.url);
+        const target = parsedUrl.protocol + "//" + parsedUrl.hostname;
+        proxy.web(req, res, { target, secure: false });
+      })
+      .listen(port);
 
-// function startServer(port) {
-//   try {
-//     http
-//       .createServer(function (req, res) {
-//         console.log("headers:", req.headers);
-//         const url = req.url;
-//         console.log("url:", url);
-//         proxy.web(
-//           req,
-//           res,
-//           { target: url, autoRewrite: true, followRedirects: true },
-//           console.log
-//         );
-//       })
-//       .listen(port);
-//     console.log("Starting Proxy Server");
-//   } catch (e) {
-//     console.log("Error:", e);
-//     startServer(port);
-//   }
-// }
+    server.on("connect", function (req, socket) {
+      console.log("Receiving reverse proxy request for:" + req.url);
+      const serverUrl = url.parse("https://" + req.url);
+      const srvSocket = net.connect(
+        serverUrl.port,
+        serverUrl.hostname,
+        function () {
+          socket.write(
+            "HTTP/1.1 200 Connection Established\r\n" +
+              "Proxy-agent: Node-Proxy\r\n" +
+              "\r\n"
+          );
+          srvSocket.pipe(socket);
+          socket.pipe(srvSocket);
+        }
+      );
+    });
 
-// startServer(PORT);
+    server.on("error", console.error);
+    server.on("close", () => console.log("Closing server...."));
+  } catch (e) {
+    console.error("Unhandled Error:", e);
+    console.log("Restarting server...");
+    startProxyServer(port);
+  }
+}
 
-var http = require("http"),
-  net = require("net"),
-  httpProxy = require("http-proxy");
-(url = require("url")), (util = require("util"));
-var proxy = httpProxy.createServer();
-var server = http
-  .createServer(function (req, res) {
-    util.puts("Receiving reverse proxy request for:" + req.url);
-    var parsedUrl = url.parse(req.url);
-    var target = parsedUrl.protocol + "//" + parsedUrl.hostname;
-    proxy.web(req, res, { target: target, secure: false });
-  })
-  .listen(8213);
-server.on("connect", function (req, socket) {
-  util.puts("Receiving reverse proxy request for:" + req.url);
-  var serverUrl = url.parse("https://" + req.url);
-  var srvSocket = net.connect(serverUrl.port, serverUrl.hostname, function () {
-    socket.write(
-      "HTTP/1.1 200 Connection Established\r\n" +
-        "Proxy-agent: Node-Proxy\r\n" +
-        "\r\n"
-    );
-    srvSocket.pipe(socket);
-    socket.pipe(srvSocket);
-  });
-});
+startProxyServer(PORT);
