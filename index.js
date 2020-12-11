@@ -31,7 +31,7 @@ function startProxyServer(port) {
           );
           srvSocket.on("error", (e) => {
             console.error("On Error:", e);
-            throw "On Error!";
+            onError(e);
           });
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
@@ -39,24 +39,26 @@ function startProxyServer(port) {
       );
       srvSocket.on("close", () => {
         console.log("Closing unexpectedly!\nAttempting to restart....");
-        startProxyServer(port);
+        onError("error");
       });
     });
 
     server.on("error", (e) => {
       console.error("On Error:", e);
-      throw "On Error!";
+      onError(e);
     });
-    server.on("close", () => console.log("Closing server...."));
-  } catch (e) {
-    console.error("Unhandled Error:", e);
-    console.log("Restarting server...");
-    try {
-      server && server.close();
-    } catch (error) {
-      console.error("Unable to close server! Restarting anyway...");
+    server.on("close", () => {
+      console.error("On Close:");
+      onError("error");
+    });
+
+    function onError(e) {
+      console.error("Unhandled Error:", e);
+      console.log("Restarting server...");
+      setTimeout(() => startProxyServer(port), 8000);
     }
-    startProxyServer(port);
+  } catch (e) {
+    onError(e);
   }
 }
 
