@@ -6,8 +6,9 @@ const proxy = httpProxy.createServer();
 const PORT = 3000;
 
 function startProxyServer(port) {
+  let server;
   try {
-    const server = http
+    server = http
       .createServer(function (req, res) {
         console.log("Receiving reverse proxy request for:" + req.url);
         const parsedUrl = url.parse(req.url);
@@ -39,6 +40,11 @@ function startProxyServer(port) {
   } catch (e) {
     console.error("Unhandled Error:", e);
     console.log("Restarting server...");
+    try {
+      server && server.close();
+    } catch (error) {
+      console.error("Unable to close server! Restarting anyway...");
+    }
     startProxyServer(port);
   }
 }
