@@ -29,6 +29,10 @@ function startProxyServer(port) {
               "Proxy-agent: Node-Proxy\r\n" +
               "\r\n"
           );
+          srvSocket.on("error", (e) => {
+            console.error("On Error:", e);
+            throw "On Error!";
+          });
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
         }
