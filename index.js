@@ -37,6 +37,10 @@ function startProxyServer(port) {
           socket.pipe(srvSocket);
         }
       );
+      srvSocket.on("close", () => {
+        console.log("Closing unexpectedly!\nAttempting to restart....");
+        startProxyServer(port);
+      });
     });
 
     server.on("error", (e) => {
