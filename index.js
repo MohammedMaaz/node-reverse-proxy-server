@@ -28,6 +28,23 @@ function isPortFree(port) {
   });
 }
 
+function waitForPortFree(port) {
+  return new Promise(function (res) {
+    const server = net.createServer(function (socket) {
+      socket.pipe(socket);
+    });
+
+    server.listen(port, "127.0.0.1");
+    server.on("error", function (e) {
+      console.log("port in use...");
+    });
+    server.on("listening", function (e) {
+      server.close();
+      res(true);
+    });
+  });
+}
+
 function startProxyServer(port) {
   console.log("starting proxy server....");
   let server;
@@ -65,6 +82,9 @@ function startProxyServer(port) {
           srvSocket.on("error", (e) => {
             console.error("On Socket Error:", e);
           });
+          srvSocket.on("close", function () {
+            onError();
+          });
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
         }
@@ -74,18 +94,23 @@ function startProxyServer(port) {
     server.on("error", (e) => {
       console.error("On Server Error:", e);
     });
-    server.on("close", () => {
-      console.error("On Server Close.");
-      onError();
-    });
+    // server.on("close", () => {
+    //   console.error("On Server Close.");
+    //   onError();
+    // });
 
     async function onError(e) {
-      const isFree = await isPortFree(port);
-      if (isFree) {
-        console.log("Server closed unexpectedly!\nAttempting to restart....");
-        server.close();
-        startProxyServer(port);
-      }
+      // const isFree = await isPortFree(port);
+      // if (isFree) {
+      //   console.log("Server closed unexpectedly!\nAttempting to restart....");
+      //   server.close();
+      //   startProxyServer(port);
+      // }
+
+      server.close();
+      await waitForPortFree(port);
+      console.log("Server closed unexpectedly!\nAttempting to restart....");
+      startProxyServer(port);
     }
   } catch (e) {
     onError(e);
