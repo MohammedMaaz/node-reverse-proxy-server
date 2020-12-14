@@ -53,18 +53,22 @@ function startProxyServer(port) {
         return;
       }
       const serverUrl = url.parse("https://" + req.url);
-      const srvSocket = net.connect(serverUrl.port, undefined, function () {
-        socket.write(
-          "HTTP/1.1 200 Connection Established\r\n" +
-            "Proxy-agent: Node-Proxy\r\n" +
-            "\r\n"
-        );
-        srvSocket.on("error", (e) => {
-          console.error("On Socket Error:", e);
-        });
-        srvSocket.pipe(socket);
-        socket.pipe(srvSocket);
-      });
+      const srvSocket = net.connect(
+        serverUrl.port,
+        serverUrl.hostname,
+        function () {
+          socket.write(
+            "HTTP/1.1 200 Connection Established\r\n" +
+              "Proxy-agent: Node-Proxy\r\n" +
+              "\r\n"
+          );
+          srvSocket.on("error", (e) => {
+            console.error("On Socket Error:", e);
+          });
+          srvSocket.pipe(socket);
+          socket.pipe(srvSocket);
+        }
+      );
       srvSocket.on("close", () => {
         console.log("Closing unexpectedly!\nAttempting to restart....");
         onError("error");
