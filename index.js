@@ -69,10 +69,6 @@ function startProxyServer(port) {
           socket.pipe(srvSocket);
         }
       );
-      srvSocket.on("close", () => {
-        console.log("Closing unexpectedly!\nAttempting to restart....");
-        onError("error");
-      });
     });
 
     server.on("error", (e) => {
@@ -80,13 +76,14 @@ function startProxyServer(port) {
     });
     server.on("close", () => {
       console.error("On Server Close.");
+      onError();
     });
 
     async function onError(e) {
       const isFree = await isPortFree(port);
       if (isFree) {
+        console.log("Server closed unexpectedly!\nAttempting to restart....");
         server.close();
-        console.log("port gets free!");
         startProxyServer(port);
       }
     }
