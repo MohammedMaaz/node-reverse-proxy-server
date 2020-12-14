@@ -99,33 +99,37 @@ const http = require("http");
 const net = require("net");
 const { URL } = require("url");
 
-// Create an HTTP tunneling proxy
-const proxy = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("okay");
-});
-
-proxy.on("connect", (req, clientSocket, head) => {
-  // Connect to an origin server
-  const url = `http://${req.url}`;
-  console.log("Connecting To:", url);
-  // if (!isValidURL(url)) {
-  //   console.log("invalid URL, returning...");
-  //   return;
-  // }
-  const { port, hostname } = new URL(url);
-  const serverSocket = net.connect(port || 80, hostname, () => {
-    clientSocket.write(
-      "HTTP/1.1 200 Connection Established\r\n" +
-        "Proxy-agent: Node.js-Proxy\r\n" +
-        "\r\n"
-    );
-    serverSocket.write(head);
-    serverSocket.pipe(clientSocket);
-    clientSocket.pipe(serverSocket);
+function startProxyServer(port, host) {
+  const proxy = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("okay");
   });
-});
 
-proxy.listen(3000, "::", function () {
-  console.log("Starting Proxy server on PORT:", 3000);
-});
+  proxy.on("connect", (req, clientSocket, head) => {
+    // Connect to an origin server
+    const url = `http://${req.url}`;
+    console.log("Connecting To:", url);
+    if (!isValidURL(url)) {
+      console.log("invalid URL, returning...");
+      return;
+    }
+    const { port, hostname } = new URL(url);
+    const serverSocket = net.connect(port || 80, hostname, () => {
+      clientSocket.write(
+        "HTTP/1.1 200 Connection Established\r\n" +
+          "Proxy-agent: Node.js-Proxy\r\n" +
+          "\r\n"
+      );
+      serverSocket.write(head);
+      serverSocket.pipe(clientSocket);
+      clientSocket.pipe(serverSocket);
+    });
+  });
+
+  proxy.listen(port, host, function () {
+    console.log(`Starting Proxy server on ${host}:${port}`);
+  });
+}
+
+startProxyServer(3000, "172.31.42.61");
+// startProxyServer(3000, '')
