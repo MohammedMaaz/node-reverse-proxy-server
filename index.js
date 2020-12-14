@@ -35,7 +35,11 @@ function startProxyServer(port) {
     server = http
       .createServer(function (req, res) {
         console.log("Receiving reverse proxy request for:" + req.url);
-        if (!isValidURL(req.url)) return;
+        if (!isValidURL(req.url)) {
+          console.log("invalid url");
+          res.end();
+          return;
+        }
         const parsedUrl = url.parse(req.url);
         const target = parsedUrl.protocol + "//" + parsedUrl.hostname;
         proxy.web(req, res, { target, secure: false });
@@ -44,7 +48,10 @@ function startProxyServer(port) {
 
     server.on("connect", function (req, socket) {
       console.log("Receiving reverse proxy request for:" + req.url);
-      if (!isValidURL(req.url)) return;
+      if (!isValidURL(req.url)) {
+        console.log("invalid url");
+        return;
+      }
       const serverUrl = url.parse("https://" + req.url);
       const srvSocket = net.connect(
         serverUrl.port,
