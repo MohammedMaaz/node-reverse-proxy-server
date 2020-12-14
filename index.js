@@ -85,6 +85,7 @@ function startProxyServer(port) {
     async function onError(e) {
       server.close();
       await waitForFreePort(port);
+      console.log("port gets free!");
       startProxyServer(port);
     }
   } catch (e) {
