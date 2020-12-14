@@ -6,6 +6,7 @@ const proxy = httpProxy.createServer();
 const PORT = 3000;
 
 function startProxyServer(port) {
+  console.log("starting proxy server....");
   let server;
   try {
     server = http
@@ -50,8 +51,7 @@ function startProxyServer(port) {
     });
 
     function onError(e) {
-      console.log("Restarting server...");
-      setTimeout(() => startProxyServer(port), 8000);
+      setTimeout(() => startProxyServer(port), 5000);
     }
   } catch (e) {
     onError(e);
