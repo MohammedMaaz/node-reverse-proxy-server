@@ -31,7 +31,6 @@ function startProxyServer(port) {
           );
           srvSocket.on("error", (e) => {
             console.error("On Socket Error:", e);
-            onError(e);
           });
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
@@ -44,16 +43,13 @@ function startProxyServer(port) {
     });
 
     server.on("error", (e) => {
-      console.error("On Error:", e);
-      onError(e);
+      console.error("On Server Error:", e);
     });
     server.on("close", () => {
-      console.error("On Close:");
-      onError("error");
+      console.error("On Server Close.");
     });
 
     function onError(e) {
-      console.error("Unhandled Error:", e);
       console.log("Restarting server...");
       setTimeout(() => startProxyServer(port), 8000);
     }
