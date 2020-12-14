@@ -83,7 +83,7 @@ function startProxyServer(port) {
     });
 
     async function onError(e) {
-      console.log("Socket Error:", e);
+      server.close();
       await waitForFreePort(port);
       startProxyServer(port);
     }
