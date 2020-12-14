@@ -100,17 +100,17 @@ function startProxyServer(port) {
     // });
 
     async function onError(e) {
-      // const isFree = await isPortFree(port);
-      // if (isFree) {
-      //   console.log("Server closed unexpectedly!\nAttempting to restart....");
-      //   server.close();
-      //   startProxyServer(port);
-      // }
+      const isFree = await isPortFree(port);
+      if (isFree) {
+        console.log("Server closed unexpectedly!\nAttempting to restart....");
+        server.close();
+        startProxyServer(port);
+      }
 
-      server.close();
-      await waitForPortFree(port);
-      console.log("Server closed unexpectedly!\nAttempting to restart....");
-      startProxyServer(port);
+      // server.close();
+      // await waitForPortFree(port);
+      // console.log("Server closed unexpectedly!\nAttempting to restart....");
+      // startProxyServer(port);
     }
   } catch (e) {
     onError(e);
