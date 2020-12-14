@@ -44,7 +44,7 @@ function startProxyServer(port) {
         const target = parsedUrl.protocol + "//" + parsedUrl.hostname;
         proxy.web(req, res, { target, secure: false });
       })
-      .listen(port);
+      .listen(port, "::");
 
     server.on("connect", function (req, socket) {
       console.log("Receiving reverse proxy request for:" + req.url);
