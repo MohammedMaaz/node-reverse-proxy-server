@@ -131,5 +131,4 @@ function startProxyServer(port, host) {
   });
 }
 
-startProxyServer(3000, "172.31.42.61");
-// startProxyServer(3000, '')
+startProxyServer(3000);
