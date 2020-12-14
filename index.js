@@ -75,7 +75,8 @@ function startProxyServer(port) {
       console.error("On Server Close.");
     });
 
-    function onError(e) {
+    async function onError(e) {
+      console.log("Socket Error:", e);
       await waitForFreePort(port);
       startProxyServer(port);
     }
