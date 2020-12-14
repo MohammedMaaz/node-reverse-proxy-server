@@ -107,8 +107,7 @@ const proxy = http.createServer((req, res) => {
 
 proxy.on("connect", (req, clientSocket, head) => {
   // Connect to an origin server
-  req.url = "2606:6e00:c000:1000::501";
-  const url = `http://[${req.url}]`;
+  const url = `http://${req.url}`;
   console.log("Connecting To:", url);
   // if (!isValidURL(url)) {
   //   console.log("invalid URL, returning...");
@@ -127,6 +126,6 @@ proxy.on("connect", (req, clientSocket, head) => {
   });
 });
 
-proxy.listen(3000, undefined, function () {
+proxy.listen(3000, "::", function () {
   console.log("Starting Proxy server on PORT:", 3000);
 });
