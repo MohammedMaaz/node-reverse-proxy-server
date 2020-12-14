@@ -107,12 +107,12 @@ const proxy = http.createServer((req, res) => {
 
 proxy.on("connect", (req, clientSocket, head) => {
   // Connect to an origin server
-  const url = `http://${req.url}`;
+  const url = `http://[${req.url}]`;
   console.log("Connecting To:", url);
-  if (!isValidURL(url)) {
-    console.log("invalid URL, returning...");
-    return;
-  }
+  // if (!isValidURL(url)) {
+  //   console.log("invalid URL, returning...");
+  //   return;
+  // }
   const { port, hostname } = new URL(url);
   const serverSocket = net.connect(port || 80, hostname, () => {
     clientSocket.write(
@@ -126,4 +126,6 @@ proxy.on("connect", (req, clientSocket, head) => {
   });
 });
 
-proxy.listen(3000);
+proxy.listen(3000, undefined, function () {
+  console.log("Starting Proxy server on PORT:", 3000);
+});
