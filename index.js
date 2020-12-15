@@ -82,9 +82,9 @@ function startProxyServer(port) {
           srvSocket.on("error", (e) => {
             console.error("On Socket Error:", e);
           });
-          srvSocket.on("close", function () {
-            onError();
-          });
+          // srvSocket.on("close", function () {
+          //   onError();
+          // });
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
         }
@@ -94,10 +94,10 @@ function startProxyServer(port) {
     server.on("error", (e) => {
       console.error("On Server Error:", e);
     });
-    // server.on("close", () => {
-    //   console.error("On Server Close.");
-    //   onError();
-    // });
+    server.on("close", () => {
+      console.error("On Server Close.");
+      onError();
+    });
 
     async function onError(e) {
       const isFree = await isPortFree(port);
@@ -106,11 +106,6 @@ function startProxyServer(port) {
         server.close();
         startProxyServer(port);
       }
-
-      // server.close();
-      // await waitForPortFree(port);
-      // console.log("Server closed unexpectedly!\nAttempting to restart....");
-      // startProxyServer(port);
     }
   } catch (e) {
     onError(e);
