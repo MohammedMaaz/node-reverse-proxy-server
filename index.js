@@ -28,23 +28,6 @@ function isPortFree(port) {
   });
 }
 
-function waitForPortFree(port) {
-  return new Promise(function (res) {
-    const server = net.createServer(function (socket) {
-      socket.pipe(socket);
-    });
-
-    server.listen(port, "127.0.0.1");
-    server.on("error", function (e) {
-      console.log("port in use...");
-    });
-    server.on("listening", function (e) {
-      server.close();
-      res(true);
-    });
-  });
-}
-
 function startProxyServer(port) {
   try {
     console.log("starting proxy server....");
