@@ -74,14 +74,17 @@ function startProxyServer(port) {
         serverUrl.port,
         serverUrl.hostname,
         function () {
+          srvSocket.on("error", (e) => {
+            console.error("On Socket Error:", e);
+          });
+          socket.on("error", function () {
+            console.error("On Socket Error:", e);
+          });
           socket.write(
             "HTTP/1.1 200 Connection Established\r\n" +
               "Proxy-agent: Node-Proxy\r\n" +
               "\r\n"
           );
-          srvSocket.on("error", (e) => {
-            console.error("On Socket Error:", e);
-          });
           // srvSocket.on("close", function () {
           //   onError();
           // });
