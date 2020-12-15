@@ -46,17 +46,16 @@ function waitForPortFree(port) {
 }
 
 function startProxyServer(port) {
-  console.log("starting proxy server....");
-
-  process.on("uncaughtException", function (err) {
-    onError(err);
-  });
-
-  process.on("unhandledRejection", function (err) {
-    onError(err);
-  });
-
   try {
+    console.log("starting proxy server....");
+
+    process.on("uncaughtException", function (err) {
+      onError(err);
+    });
+    process.on("unhandledRejection", function (err) {
+      onError(err);
+    });
+
     let server = http
       .createServer(function (req, res) {
         console.log("Receiving reverse proxy request for:" + req.url);
@@ -72,7 +71,7 @@ function startProxyServer(port) {
       .listen(port);
 
     server.on("error", (e) => {
-      console.error("On Server Error:", e);
+      onError(e);
     });
 
     server.on("connect", function (req, socket) {
@@ -88,10 +87,10 @@ function startProxyServer(port) {
         serverUrl.hostname,
         function () {
           srvSocket.on("error", (e) => {
-            console.error("On Socket Error:", e);
+            onError(e);
           });
-          socket.on("error", function () {
-            console.error("On Socket Error:", e);
+          socket.on("error", function (e) {
+            onError(e);
           });
           socket.write(
             "HTTP/1.1 200 Connection Established\r\n" +
@@ -106,11 +105,11 @@ function startProxyServer(port) {
     });
 
     server.on("close", () => {
-      console.error("On Server Close.");
-      onError();
+      onError("server closed");
     });
 
     async function onError(e) {
+      console.log("On Error:", e);
       const isFree = await isPortFree(port);
       if (isFree) {
         console.log("Server closed unexpectedly!\nAttempting to restart....");
