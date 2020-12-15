@@ -47,9 +47,17 @@ function waitForPortFree(port) {
 
 function startProxyServer(port) {
   console.log("starting proxy server....");
-  let server;
+
+  process.on("uncaughtException", function (err) {
+    onError(err);
+  });
+
+  process.on("unhandledRejection", function (err) {
+    onError(err);
+  });
+
   try {
-    server = http
+    let server = http
       .createServer(function (req, res) {
         console.log("Receiving reverse proxy request for:" + req.url);
         if (!isValidURL(req.url)) {
@@ -63,12 +71,17 @@ function startProxyServer(port) {
       })
       .listen(port);
 
+    server.on("error", (e) => {
+      console.error("On Server Error:", e);
+    });
+
     server.on("connect", function (req, socket) {
       console.log("Receiving reverse proxy request for:" + req.url);
       if (!isValidURL(req.url)) {
         console.log("invalid url");
         return;
       }
+
       const serverUrl = url.parse("https://" + req.url);
       const srvSocket = net.connect(
         serverUrl.port,
@@ -85,18 +98,13 @@ function startProxyServer(port) {
               "Proxy-agent: Node-Proxy\r\n" +
               "\r\n"
           );
-          // srvSocket.on("close", function () {
-          //   onError();
-          // });
+
           srvSocket.pipe(socket);
           socket.pipe(srvSocket);
         }
       );
     });
 
-    server.on("error", (e) => {
-      console.error("On Server Error:", e);
-    });
     server.on("close", () => {
       console.error("On Server Close.");
       onError();
