@@ -1,3 +1,8 @@
 # node-reverse-proxy-server
 
-A simple Node JS reverse proxy server with automatic error recovery and url validation using node-http-proxy.
+An opensource, simple and lightweight Node JS reverse proxy server based on http-proxy
+
+Features:
+Automatic Error Recovery
+URL Validation
+ipv6 Support
